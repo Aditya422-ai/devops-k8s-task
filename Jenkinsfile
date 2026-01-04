@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'master' } 
 
     environment {
         IMAGE = "adityakul548/hello-k8s:latest"
