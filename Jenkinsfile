@@ -39,13 +39,15 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KCFG')]) {
-                    sh '''
-                      export KUBECONFIG=$KCFG
-                      kubectl apply -f k8s/
-                      kubectl rollout status deployment hello-deployment
-                    '''
-                }
+               withCredentials([string(credentialsId: 'kubeconfig', variable: 'KCFG')]) {
+    sh '''
+      echo "$KCFG" > kubeconfig
+      export KUBECONFIG=$PWD/kubeconfig
+      kubectl apply -f k8s/
+      kubectl rollout status deployment hello-deployment
+    '''
+}
+
             }
         }
     }
