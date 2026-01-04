@@ -38,6 +38,7 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
+
             steps {
                withCredentials([string(credentialsId: 'kubeconfig', variable: 'KCFG')]) {
     sh '''
@@ -49,6 +50,17 @@ pipeline {
 }
 
             }
+
+    steps {
+        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+            sh '''
+              kubectl apply -f k8s/
+              kubectl rollout status deployment hello-deployment
+            '''
+ (Fix kubeconfig usage using secret file)
         }
+    }
+}
+
     }
 }
