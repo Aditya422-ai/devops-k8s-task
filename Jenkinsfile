@@ -1,11 +1,12 @@
 pipeline {
-    agent { label 'built-in' } 
+    agent { label 'built-in' }
 
     environment {
         IMAGE = "adityakul548/hello-k8s:latest"
     }
 
     stages {
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
@@ -22,9 +23,9 @@ pipeline {
         stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(
-                  credentialsId: 'dockerhub-creds',
-                  usernameVariable: 'DOCKER_USER',
-                  passwordVariable: 'DOCKER_PASS'
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
                 )]) {
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                 }
@@ -38,29 +39,13 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
-
             steps {
-               withCredentials([string(credentialsId: 'kubeconfig', variable: 'KCFG')]) {
-    sh '''
-      echo "$KCFG" > kubeconfig
-      export KUBECONFIG=$PWD/kubeconfig
-      kubectl apply -f k8s/
-      kubectl rollout status deployment hello-deployment
-    '''
-}
-
+                sh '''
+                  kubectl apply -f k8s/
+                  kubectl rollout status deployment hello-deployment
+                '''
             }
-
-    steps {
-        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-            sh '''
-              kubectl apply -f k8s/
-              kubectl rollout status deployment hello-deployment
-            '''
- (Fix kubeconfig usage using secret file)
         }
     }
 }
 
-    }
-}
